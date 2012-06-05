@@ -6,22 +6,22 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.internal.DefaultExecAction
 import org.gradle.process.internal.ExecAction
 
-class SphinxTask extends DefaultTask {
+class Sphinx extends DefaultTask {
 
   private ExecAction action;
   private buildCommand = "sphinx-build"
-  private command = "html"
+  private target = "html"
   private documentRoot = "document"
   private output = "build/document"
 
-  SphinxTask() {
+  Sphinx() {
     action = new DefaultExecAction(getServices().get(FileResolver.class))
   }
 
   @TaskAction
   def build() {
     action.executable = buildCommand
-    action.args = ['-b', command, documentRoot, output]
+    action.args = ['-b', target, documentRoot, output]
     println "sphinx-build command line option:${action.args.join(' ')}"
     def execResult = action.execute()
   }
@@ -31,8 +31,8 @@ class SphinxTask extends DefaultTask {
     this
   }
 
-  def setCommand(def command) {
-    this.command = command
+  def setTarget(def target) {
+    this.target = target
     this
   }
 
@@ -45,4 +45,5 @@ class SphinxTask extends DefaultTask {
     this.output = output
     this
   }
+
 }

@@ -1,1 +1,24 @@
-This file was created by IntelliJ IDEA (Nika.1) IU-117.499 for binding GitHub repository
+Sphinx build task.
+
+example:default settings
+
+default setting details
+    buildCommand sphinx-build
+    target       html
+    documentRoot document
+    output       build/document
+
+task buildDocument(type : Sphinx) {
+}
+
+example:override settings
+    target       html->singlehtml
+    documentRoot document->doc
+    output       build/document->output/doc
+
+task buildDocument(type : Sphinx) {
+    target 'singlehtml'
+    documentRoot 'doc'
+    output  'output/doc'
+}
+

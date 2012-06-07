@@ -5,10 +5,12 @@ SphinxドキュメントをビルドするためのGradle拡張プラグイン
 インストール方法
 ================
 1.src配下を、gradleを使用するプロジェクトのbuildSrc配下に配置する。
+
  配置後のイメージは以下のようになります。
  $プロジェクトルーツ$/buildSrc/src/main/groovy/siosio/gradle/Sphinx.groovy
 
 2.resource配下を、プロジェクトbuildSrc配下に配置する。
+
  配置後のイメージは以下のようになります。
  $プロジェクトルーツ$/buildSrc/src/main/resources/META-INF/gradle-plugins/Sphinx.properties
 
@@ -60,6 +62,7 @@ __デフォルト設定で実行する場合__
 
 
 __デフォルト設定を変更して実行する場合__
+
 メソッド呼出の場合、以下の例のように1タスク内で複数のドキュメントをビルドすることも出来ます。
 
     apply plugin : 'Sphinx'

@@ -62,12 +62,12 @@ class SphinxPlugin implements Plugin<Project> {
 }
 class SphinxBuildAction {
 
-  def ExecAction action;
-  def buildCommand = "sphinx-build"
-  def target = "html"
-  def documentRoot = "document"
-  def output = "build/document"
-  def options = []
+  private def ExecAction action;
+  private def buildCommand = "sphinx-build"
+  private def target = "html"
+  private def documentRoot = "document"
+  private def output = "build/document"
+  private List<String> options = []
 
   SphinxBuildAction(def fileResolver) {
     action = new DefaultExecAction(fileResolver)
@@ -75,10 +75,7 @@ class SphinxBuildAction {
 
   def execute() {
     action.executable = buildCommand
-    def args = ['-b', target]
-    args += options
-    args += [documentRoot, output]
-    action.args = args
+    action.args = ['-b', target, *options, documentRoot, output]
     println "sphinx-build command line option:${action.args.join(' ')}"
     action.execute()
   }
@@ -103,8 +100,8 @@ class SphinxBuildAction {
     this
   }
 
-  def options(def options) {
-    this.options = options
+  def options(String... options) {
+    this.options = options as List<String>
     this
   }
 }

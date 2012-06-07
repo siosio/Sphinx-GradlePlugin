@@ -9,48 +9,114 @@ import org.gradle.process.internal.DefaultExecAction
 import org.gradle.process.internal.ExecAction
 import org.gradle.util.ConfigureUtil
 
+/**
+ * Sphinxのビルドを行うためのタスク。
+ *
+ * 使用例。
+ * <pre autoTested=''>
+ * // デフォルト設定を使用する場合
+ * task buildDocument(type : Sphinx) {
+ * }
+ *
+ * // 設定を変更する場合
+ * task buildDocument(type : Sphinx) {
+ *   target 'singlehtml'     // singlehtml形式で出力
+ *   documentRoot 'doc'      // ビルド対象は、「doc」配下
+ *   output  'output/doc'    // ビルド結果は、「output/doc」に出力
+ * }
+ * </pre>
+ */
 class Sphinx extends DefaultTask {
 
+  /** ビルドを実行するアクション */
   private SphinxBuildAction action
 
+  /**
+   * コンストラクタ。
+   */
   Sphinx() {
     action = new SphinxBuildAction(getServices().get(FileResolver.class))
   }
 
+  /**
+   * ビルドを行う。
+   */
   @TaskAction
   def build() {
-    action.executable = buildCommand
-    action.args = ['-b', target, documentRoot, output]
+    action.execute()
   }
 
+  /**
+   * ビルドコマンドを設定する。
+   *
+   * デフォルト値は、sphinx-build
+   * @param buildCommand コマンド名(絶対パスなどでの指定も可)
+   * @return 自分自身
+   */
   def setBuildCommand(def buildCommand) {
     action.buildCommand = buildCommand
     this
   }
 
+  /**
+   * ターゲットを設定する。
+   *
+   * デフォルト値は、html
+   * @param target ターゲット名(例えば、singlehtmlやepubなど)
+   * @return 自分自身
+   */
   def setTarget(def target) {
     action.target = target
     this
   }
 
+  /**
+   * ドキュメントルート(conf.pyのあるディレクトリ)を設定する。
+   *
+   * デフォルト値は、document
+   *
+   * @param documentRoot ドキュメントルート
+   * @return 自分自身
+   */
   def setDocumentRoot(def documentRoot) {
     action.documentRoot = documentRoot
     this
   }
 
+  /**
+   * 出力先のディレクトリを設定する。
+   *
+   * デフォルト値は、build/document
+   *
+   * @param output 出力先のディレクトリ
+   * @return 自分自身
+   */
   def setOutput(def output) {
     action.output = output
     this
   }
 
-  def setOptions(def options) {
+  /**
+   * オプションを設定する。
+   *
+   * デフォルトはなし。
+   *
+   * @param options オプションを配列で設定する。
+   * @return 自分自身
+   */
+  def setOptions(String... options) {
     action.options = options
     this
   }
 }
 
+/**
+ * Sphinxプラグイン。
+ *
+ * このプラグインでは、{@link Project}に対してsphinxBuildメソッドを追加する。
+ * これにより、タスク内でsphinxBuildメソッドを使用して任意のタイミングでドキュメントのビルドを行うこともできる。
+ */
 class SphinxPlugin implements Plugin<Project> {
-
   @Override
   void apply(Project target) {
     target.metaClass.sphinxBuild {closure ->
@@ -60,6 +126,21 @@ class SphinxPlugin implements Plugin<Project> {
     }
   }
 }
+
+/**
+ * Sphinxのビルドを行うクラス。
+ *
+ * デフォルト値として以下の設定値を持つ。
+ *
+ * <pre>
+ * ビルドコマンド      -> sphix-build
+ * ターゲット          -> html
+ * ドキュメントルート  -> document
+ * 出力先ディレクトリ  -> build/document
+ * ビルドオプション    -> なし
+ * </pre>
+ *
+ */
 class SphinxBuildAction {
 
   private def ExecAction action;
@@ -75,7 +156,7 @@ class SphinxBuildAction {
 
   def execute() {
     action.executable = buildCommand
-    action.args = ['-b', target, *options, documentRoot, output]
+    action.args = ['-b', target, * options, documentRoot, output]
     println "sphinx-build command line option:${action.args.join(' ')}"
     action.execute()
   }

@@ -8,6 +8,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.internal.DefaultExecAction
 import org.gradle.process.internal.ExecAction
 import org.gradle.util.ConfigureUtil
+import org.gradle.api.GradleException
 
 /**
  * Sphinxのビルドを行うためのタスク。
@@ -117,8 +118,10 @@ class Sphinx extends DefaultTask {
  * これにより、タスク内でsphinxBuildメソッドを使用して任意のタイミングでドキュメントのビルドを行うこともできる。
  */
 class SphinxPlugin implements Plugin<Project> {
+
   @Override
   void apply(Project target) {
+    target.setStatus(100)
     target.metaClass.sphinxBuild {closure ->
       def action = new SphinxBuildAction(target.fileResolver)
       ConfigureUtil.configure(closure, action)
@@ -155,10 +158,22 @@ class SphinxBuildAction {
   }
 
   def execute() {
+    action.workingDir = documentRoot
     action.executable = buildCommand
     action.args = ['-b', target, * options, documentRoot, output]
     println "sphinx-build command line option:${action.args.join(' ')}"
-    action.execute()
+
+    def wrapper = new OutputStreamWrapper(stream: action.errorOutput)
+    try {
+      action.setErrorOutput(wrapper)
+      def result = action.execute()
+      if (wrapper.warnings) {
+        throw new GradleException("sphinx build was output warning. document root = [${documentRoot}]")
+      }
+      result
+    } finally {
+      wrapper.close()
+    }
   }
 
   def target(String target) {
@@ -184,6 +199,45 @@ class SphinxBuildAction {
   def options(String... options) {
     this.options = options as List<String>
     this
+  }
+}
+
+class OutputStreamWrapper extends OutputStream {
+
+  OutputStream stream
+
+  List warnings = []
+
+  OutputStreamWrapper() {
+  }
+
+  @Override
+  void write(int b) {
+    stream.write(b)
+  }
+
+  @Override
+  void write(byte[] b) {
+    stream.write(b)
+  }
+
+  @Override
+  void write(byte[] b, int off, int len) {
+    stream.write(b, off, len)
+    def str = new String(b, off, len)
+    if (str.contains('WARNING')) {
+      warnings << str
+    }
+  }
+
+  @Override
+  void close() {
+    stream.close()
+  }
+
+  @Override
+  void flush() {
+    stream.flush()
   }
 }
 

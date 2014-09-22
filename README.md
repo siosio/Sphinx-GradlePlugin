@@ -24,17 +24,19 @@ $プロジェクトルーツ$/buildSrc/src/main/resources/META-INF/gradle-plugin
 
 * buildCommand(ビルド時に使用するコマンド)
 
-    sphinx-build
+  デフォルト:sphinx-build
 
 * target(出力形式(html、singlehtml、epubなど)
 
-    html
+  デフォルト:html
+
 * documentRoot(ドキュメントのルートディレクトリ(conf.pyのあるディレクトリ))
 
-    document
+  デフォルト:doc
+
 * output(ビルドしたドキュメントの出力先)
 
-    build/document
+  デフォルト:build/doc
 
 タスクとして使用する
 -----------------------
@@ -46,42 +48,8 @@ __デフォルト設定で実行する場合__
 __デフォルト設定を変更して実行する場合__
 
     task buildDocument(type : Sphinx) {
-        target 'singlehtml'     // singlehtml形式で出力
+        format 'singlehtml'     // singlehtml形式で出力
         documentRoot 'doc'      // ビルド対象は、「doc」配下
         output  'output/doc'    // ビルド結果は、「output/doc」に出力
     }
-
-メソッド呼出として使用する
---------------------------
-メソッド呼出で使用する場合は、Sphinxプラグインを使用します。
-
-__デフォルト設定で実行する場合__
-
-    apply plugin : 'Sphinx'
-
-    task documentBuild() << {
-       sphinxBuild {}
-    }
-
-
-__デフォルト設定を変更して実行する場合__
-
-メソッド呼出の場合、以下の例のように1タスク内で複数のドキュメントをビルドすることも出来ます。
-
-    apply plugin : 'Sphinx'
-
-    task documentBuild() << {
-       sphinxBuild {
-           target 'singlehtml'     // singlehtml形式で出力
-           documentRoot 'doc'      // ビルド対象は、「doc」配下
-           output  'output/doc'    // ビルド結果は、「output/doc」に出力
-       }
-
-       sphinxBuild {
-           target 'singlehtml'      // singlehtml形式で出力
-           documentRoot 'doc2'      // ビルド対象は、「doc2」配下
-           output  'output/doc2'    // ビルド結果は、「output/doc2」に出力
-       }
-    }
-
 

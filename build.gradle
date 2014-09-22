@@ -1,0 +1,17 @@
+apply plugin: 'groovy'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile gradleApi()
+
+  testCompile ('org.spockframework:spock-core:0.7-groovy-2.0') {
+    exclude module: 'groovy-all'
+  }
+}
+

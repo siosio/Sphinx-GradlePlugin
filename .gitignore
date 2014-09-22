@@ -1,6 +1,8 @@
 *.jar
 *.iml
-./idea
+.idea/*
 
-.gradle
-build
+.gradle/*
+build/*
+
+src/test/data/output/*

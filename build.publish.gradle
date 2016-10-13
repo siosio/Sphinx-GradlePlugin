@@ -1,0 +1,106 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+// Ask password for GnuPG singing.
+boolean validProperty(propertyName) {
+  try { project.property(propertyName) != null }
+  catch (MissingPropertyException) { false }
+}
+assert validProperty('signing.keyId'),             'properties for signing must be provided'
+assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
+
+String askPassword(prompt) {
+  "${System.console().readPassword(prompt)}"
+}
+ext.'signing.password' = askPassword("Enter password for PGP key ${property('signing.keyId')}: ")
+
+signing {
+  sign configurations.archives
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name project.name
+            packaging 'jar'
+            description projectDesc
+            url projectUrl
+            version currentVersion
+            licenses {
+                license {
+                    name licenseName
+                    url licenseUrl
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url githubUrl
+                connection "scm:git:${githubUrl}"
+                developerConnection "scm:git:${githubUrl}"
+            }
+            developers {
+                developer {
+                    id developerId
+                    name developerName
+                    email developerEmail
+                }
+            }
+        }
+    }
+}
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    dryRun = false
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = projectName
+        desc = projectDesc
+        websiteUrl = projectUrl
+        issueTrackerUrl = projectUrl + '/issues'
+        vcsUrl = projectUrl
+        githubRepo = githubUser + '/' + githubRepository
+        licenses = [licenseCName]
+        labels = ['Sphinx', 'Gradle']
+        publicDownloadNumbers = true
+    }
+}
+
+// maven publish to local repository.(for test)
+uploadArchives {
+    repositories.mavenDeployer {
+        // for local maven
+        repository url: "file://$System.env.HOME/.m2/repository"
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        pom.project {
+            name project.name
+            packaging 'jar'
+            description projectDesc
+            url projectUrl
+            version currentVersion
+            licenses {
+                license {
+                    name licenseName
+                    url licenseUrl
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url githubUrl
+                connection "scm:git:${githubUrl}"
+                developerConnection "scm:git:${githubUrl}"
+            }
+            developers {
+                developer {
+                    id developerId
+                    name developerName
+                    email developerEmail
+                }
+            }
+        }
+    }
+}
+

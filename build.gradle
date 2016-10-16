@@ -1,10 +1,22 @@
-apply plugin: 'groovy'
+plugins {
+    // bintray
+    id "com.jfrog.bintray" version "1.6"
+}
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = projectGroup
+version = currentVersion
+
+compileGroovy {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
 
 repositories {
-  mavenCentral()
+  jcenter()
 }
 
 dependencies {
@@ -13,5 +25,31 @@ dependencies {
   testCompile ('org.spockframework:spock-core:0.7-groovy-2.0') {
     exclude module: 'groovy-all'
   }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task createReleasePropertiesFile(type:Exec) {
+    String fileName = 'sphinx.plugin.release.properties'
+    println "Creating $fileName"
+    String fileContent = "version=$currentVersion"
+    (new File("$rootDir/src/main/resources/$fileName")).write(fileContent)
+}
+
+artifacts {
+    archives jar
+    archives sourceJar
+}
+
+task wrapper(type: Wrapper, description: 'Gradle Wrapper task') {
+    gradleVersion = '3.0'
+}
+
+if (gradle.startParameter.taskNames.contains('uploadArchives') ||
+    gradle.startParameter.taskNames.contains('bintrayUpload')) {
+  apply from: 'build.publish.gradle'
 }
 

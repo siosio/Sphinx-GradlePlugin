@@ -6,3 +6,4 @@
 build/*
 
 src/test/data/output/*
+src/main/resources/sphinx.plugin.release.properties

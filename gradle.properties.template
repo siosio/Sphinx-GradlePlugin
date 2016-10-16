@@ -1,0 +1,10 @@
+# template for $HOME/.gradle/gradle.properties
+bintrayUser=hoge
+bintrayApiKey=1234567890abcdef
+signing.keyId=0123456
+signing.secretKeyRingFile=/home/user/.gnupg/secring.gpg
+sonatypeUsername=hoge
+sonatypeFullname='Full Name'
+sonatypeKey=abcdAjf
+sonatypeToken=hogehogefugafuga
+githubToken=1234567890abcdef

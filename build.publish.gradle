@@ -1,18 +1,39 @@
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+import groovy.swing.SwingBuilder
 
-// Ask password for GnuPG singing.
 boolean validProperty(propertyName) {
   try { project.property(propertyName) != null }
   catch (MissingPropertyException) { false }
 }
-assert validProperty('signing.keyId'),             'properties for signing must be provided'
-assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
 
 String askPassword(prompt) {
-  "${System.console().readPassword(prompt)}"
+    def keyPass = ''
+    if(System.console() == null) {
+        new SwingBuilder().edt {
+            dialog(modal: true, title: 'Enter password', alwaysOnTop: true, resizable: false, locationRelativeTo: null, pack: true, show: true) {
+                vbox {
+                    label(text: prompt)
+                    def input1 = passwordField()
+                    button(defaultButton: true, text: 'OK', actionPerformed: {
+                        keyPass = input1.password;
+                        dispose();
+                    })
+                }
+            }
+        }
+    } else {
+        keyPass = System.console().readPassword(prompt)
+    }
+    if (keyPass.size() <= 0) {
+        throw new InvalidUserDataException("You must enter the passwords to proceed.")
+    }
+    new String(keyPass)
 }
+
+assert validProperty('signing.keyId'),             'properties for signing must be provided'
+assert validProperty('signing.secretKeyRingFile'), 'properties for signing must be provided'
 ext.'signing.password' = askPassword("Enter password for PGP key ${property('signing.keyId')}: ")
 
 signing {
